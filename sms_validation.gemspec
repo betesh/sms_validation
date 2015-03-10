@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = SmsValidation::VERSION
   spec.authors       = ["Isaac Betesh"]
   spec.email         = ["iybetesh@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.description   = "Validate the phone number and content of an SMS Message.  This gem does not send SMS messages.  It just makes sure the arguments are valid."
+  spec.summary       = `cat README.md`
+  spec.homepage      = "https://github.com/betesh/sms_validation/"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
