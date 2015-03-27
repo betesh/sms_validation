@@ -9,6 +9,8 @@ module SmsValidation
     MAX_LENGTH = 160
     MAX_SECTION_LENGTH = MAX_LENGTH - "(MSG XXX/XXX): ".size
     MESSAGE_WHEN_SPLIT_MESSAGE = "This message was split because it is too long to fit into a single SMS.  Instead of #message, use #messages or change SmsValidation.configuration.on_message_too_long to something other than :split"
+    LEGAL_CHARACTERS = "~\`!\"#\$\%&'\(\)*+,-.\/:;<=>?@_£¤¥§¿i¡ÄÅÃÆÇÉÑÖØÜßâáäåãæçèéìíñòöøóùüú\n\r\t ©"
+    ILLEGAL_CHARACTERS = /([^a-zA-Z0-9#{LEGAL_CHARACTERS}\\])/
 
     attr_reader :phone, :messages
 
@@ -18,6 +20,8 @@ module SmsValidation
       raise InvalidPhoneNumberError, "Phone number cannot begin with a \"#{phone[0]}\"" if ['0','1'].include?(phone[0].to_s)
       raise InvalidMessageError, "Message cannot be blank" if message.empty?
       SmsValidation.configuration.logger.warn { "WARNING: Some characters may be lost because the message must be broken into at least 1000 sections" } if message.size > (999 * MAX_SECTION_LENGTH)
+      illegal_characters = message.scan(ILLEGAL_CHARACTERS).to_a
+      raise InvalidMessageError, "Message cannot contain the following special characters: #{illegal_characters.uniq.join(', ')}" unless illegal_characters.size.zero?
       @messages = (message.size > MAX_LENGTH) ? SmsValidation::Sms.__send__(SmsValidation.configuration.on_message_too_long, message) : [message.dup]
       @phone = "1#{phone}"
     end

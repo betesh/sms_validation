@@ -82,6 +82,38 @@ describe SmsValidation::Sms do
       end
     end
 
+    describe "when it contains only legal characters" do
+      described_class::LEGAL_CHARACTERS.each_char do |i|
+        describe "when message contains legal character '#{i}'" do
+          let(:message) { "#{super()}#{i}#{super()}" }
+
+          it { expect(subject.message).to eq(message) }
+        end
+      end
+
+      describe "when message contains legal character '\'" do
+        let(:message) { "#{super()}\A#{super()}" }
+
+        it { expect(subject.message).to eq(message) }
+      end
+    end
+
+    describe "when it contains illegal characters" do
+      ["\u2018", "\u2019", "\u201c", "\u201d"].each do |i|
+        describe "when message contains illegal character '#{i}'" do
+          let(:message) { "#{super()}#{i}#{super()}" }
+
+          it { expect{subject}.to raise_error(SmsValidation::Sms::InvalidMessageError, "Message cannot contain the following special characters: #{i}") }
+        end
+      end
+
+      describe "when message contains multiple illegal characters" do
+        let(:message) { "#{super()}\u2018\u2019\u8888#{super()}" }
+
+        it { expect{subject}.to raise_error(SmsValidation::Sms::InvalidMessageError, "Message cannot contain the following special characters: \u2018, \u2019, \u8888") }
+      end
+    end
+
     describe "when longer than 160 characters" do
       describe "when on_message_too_long = :truncate" do
         let(:on_message_too_long) { :truncate }
